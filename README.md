@@ -2,6 +2,9 @@
 
 A markdown-native AI report editor that can query your data, understand your internal definitions, and turn that into editable documents with inline AI patches.
 
+## License
+Licensed under the GNU Affero General Public License v3 (AGPL-3.0-or-later). See the `LICENSE` file for the full text.
+
 ## Architecture
 
 ```
