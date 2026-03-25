@@ -2,6 +2,49 @@
 
 A markdown-native AI report editor that can query your data, understand your internal definitions, and turn that into editable documents with inline AI patches.
 
+## Problem
+
+As a product manager, have you ever used Gemini in Google Docs to write your data reports?
+It sounds fast... until the assistant “fills in” numbers you never gave it, or misunderstands what a metric *actually* means in your org.
+
+What if your assistant had real context from your internal data warehouse (and your metric dictionary) so it could ground insights in accurate, up-to-the-minute data?
+
+## Introducing ClawDocs
+
+ClawDocs is an AI agent writer that connects to your data through a standard MCP server, fetches accurate info in real time, and writes into your markdown document with structured inline edits.
+
+Example schema used in the project (reporting tables): columns + data types
+
+| Reporting table | Column name | Data type |
+|---|---|---|
+| `weekly_retention` | `region` | `text` |
+| `weekly_retention` | `week` | `text` |
+| `weekly_retention` | `platform` | `text` |
+| `weekly_retention` | `users` | `integer` |
+| `weekly_retention` | `retention_rate` | `numeric(5,4)` |
+| `daily_active_users` | `date` | `date` |
+| `daily_active_users` | `region` | `text` |
+| `daily_active_users` | `platform` | `text` |
+| `daily_active_users` | `dau` | `integer` |
+| `revenue_by_month` | `region` | `text` |
+| `revenue_by_month` | `month` | `text` |
+| `revenue_by_month` | `revenue` | `numeric(12,2)` |
+| `revenue_by_month` | `currency` | `text` |
+| `metric_definitions` | `name` | `text` |
+| `metric_definitions` | `definition` | `text` |
+| `metric_definitions` | `owner` | `text` |
+| `metric_definitions` | `caveats` | `text` |
+| `metric_definitions` | `source_link` | `text` |
+| `data_dictionary` | `table_name` | `text` |
+| `data_dictionary` | `column_name` | `text` |
+| `data_dictionary` | `meaning` | `text` |
+| `data_dictionary` | `type` | `text` |
+| `data_dictionary` | `examples` | `text` |
+
+Infra:
+- Vercel for the frontend (Next.js) with rate limiting on `POST /api/chat`
+- MCP server on Cloud Run (Express + `@modelcontextprotocol/sdk`) wrapping Supabase read-only query tools
+
 ## License
 Licensed under the GNU Affero General Public License v3 (AGPL-3.0-or-later). See the `LICENSE` file for the full text.
 
