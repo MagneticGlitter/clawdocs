@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #0a0a0a;
+  --color-foreground: #ededed;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: #0a0e14;
+  color: #ededed;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* CodeMirror overrides */
+.cm-editor {
+  height: 100% !important;
+}
+.cm-editor .cm-scroller {
+  overflow: auto;
+}
+.cm-editor.cm-focused {
+  outline: none !important;
+}
+
+/* Markdown heading anchors */
+.prose-invert h1:first-child {
+  margin-top: 0;
+}
+
+/* Task list checkboxes */
+.prose-invert input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #475569;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+  margin-right: 8px;
+  position: relative;
+}
+.prose-invert input[type="checkbox"]:checked {
+  background: #6366f1;
+  border-color: #6366f1;
+}
+.prose-invert input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
