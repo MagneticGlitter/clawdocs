@@ -25,14 +25,14 @@ const SAMPLE_DATA: Record<string, Record<string, unknown>[]> = {
   ],
 };
 
-const COLORS = ["#818cf8", "#f472b6", "#34d399", "#fbbf24", "#60a5fa"];
+const COLORS = ["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#3b82f6"];
 
 export default function ClawChart({ config }: { config: ClawChartBlock }) {
   const data = config.data || SAMPLE_DATA[config.source] || [];
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 bg-slate-800/50 rounded-lg border border-slate-700 text-slate-400 text-sm">
+      <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg border border-gray-200 text-gray-400 text-sm">
         No data for source: {config.source}
       </div>
     );
@@ -45,15 +45,17 @@ export default function ClawChart({ config }: { config: ClawChartBlock }) {
     margin: { top: 8, right: 24, left: 0, bottom: 0 },
   };
 
+  const tooltipStyle = { backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px", fontSize: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" };
+
   const renderChart = () => {
     switch (config.type) {
       case "bar":
         return (
           <BarChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis dataKey={config.x} stroke="#64748b" fontSize={12} />
-            <YAxis stroke="#64748b" fontSize={12} />
-            <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px", fontSize: "12px" }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+            <XAxis dataKey={config.x} stroke="#9ca3af" fontSize={12} />
+            <YAxis stroke="#9ca3af" fontSize={12} />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend />
             {dataKeys.map((key, i) => (
               <Bar key={key} dataKey={key} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
@@ -63,23 +65,23 @@ export default function ClawChart({ config }: { config: ClawChartBlock }) {
       case "area":
         return (
           <AreaChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis dataKey={config.x} stroke="#64748b" fontSize={12} />
-            <YAxis stroke="#64748b" fontSize={12} />
-            <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px", fontSize: "12px" }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+            <XAxis dataKey={config.x} stroke="#9ca3af" fontSize={12} />
+            <YAxis stroke="#9ca3af" fontSize={12} />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend />
             {dataKeys.map((key, i) => (
-              <Area key={key} type="monotone" dataKey={key} stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]} fillOpacity={0.15} />
+              <Area key={key} type="monotone" dataKey={key} stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]} fillOpacity={0.1} />
             ))}
           </AreaChart>
         );
       default:
         return (
           <LineChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis dataKey={config.x} stroke="#64748b" fontSize={12} />
-            <YAxis stroke="#64748b" fontSize={12} />
-            <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px", fontSize: "12px" }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+            <XAxis dataKey={config.x} stroke="#9ca3af" fontSize={12} />
+            <YAxis stroke="#9ca3af" fontSize={12} />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend />
             {dataKeys.map((key, i) => (
               <Line key={key} type="monotone" dataKey={key} stroke={COLORS[i % COLORS.length]} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
@@ -90,9 +92,9 @@ export default function ClawChart({ config }: { config: ClawChartBlock }) {
   };
 
   return (
-    <div className="my-4 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
+    <div className="my-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
       {config.title && (
-        <h4 className="text-sm font-medium text-slate-300 mb-3">{config.title}</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-3">{config.title}</h4>
       )}
       <ResponsiveContainer width="100%" height={260}>
         {renderChart()}

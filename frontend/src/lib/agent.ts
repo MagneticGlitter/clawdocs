@@ -156,6 +156,15 @@ async function reflectionNode(
     .map((m) => `[${(m as { name?: string }).name ?? "tool"}]: ${typeof m.content === "string" ? m.content : JSON.stringify(m.content)}`)
     .join("\n\n");
 
+  const toolCallCount = state.messages.filter((m) => m._getType() === "tool").length;
+
+  if (toolCallCount >= 6) {
+    return {
+      toolResultsSummary: toolOutputs,
+      messages: [new AIMessage("ENOUGH — max tool calls reached. Proceeding to draft edits.")],
+    };
+  }
+
   const resp = await model.invoke([
     new SystemMessage(
       `You are the reflection module. You have gathered tool results.
@@ -163,6 +172,8 @@ Review them and decide: do you have enough information to write the document edi
 
 Tool results so far:
 ${toolOutputs}
+
+You have made ${toolCallCount} tool call(s) so far. Be decisive — if you have ANY data relevant to the user's request, respond ENOUGH. Only respond NEED_MORE if you have zero usable data.
 
 If you have enough data, respond with exactly: ENOUGH
 If you need more, respond with exactly: NEED_MORE followed by a brief explanation.`
@@ -176,6 +187,24 @@ If you need more, respond with exactly: NEED_MORE followed by a brief explanatio
     toolResultsSummary: toolOutputs,
     messages: [new AIMessage(content.startsWith("ENOUGH") ? "Data gathering complete. Moving to draft edits." : content)],
   };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Helper: ensure clawchart / clawtable blocks have markdown fences  */
+/* ------------------------------------------------------------------ */
+
+function ensureChartFences(text: string | undefined): string | undefined {
+  if (!text) return text;
+
+  return text.replace(
+    /(?:^|\n)(clawchart|clawtable)\n([\s\S]*?)(?=\n```|$)/gm,
+    (_match, lang: string, body: string, offset: number) => {
+      const before = text.slice(0, offset);
+      if (before.endsWith("```")) return _match;
+      const prefix = offset === 0 ? "" : "\n";
+      return `${prefix}\`\`\`${lang}\n${body.trimEnd()}\n\`\`\``;
+    }
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -209,21 +238,23 @@ IMPORTANT RULES:
 - NEVER try to put the entire document content in "oldText" — it will fail to match. Use "replace_all" instead.
 
 CHARTS AND TABLES:
-When you have data from tool queries and the user wants visualizations, embed them using custom fenced blocks:
+When you have data from tool queries and the user wants visualizations, embed them in the "newText" field using markdown fenced code blocks with the language set to "clawchart" or "clawtable". The triple backticks MUST be included in the newText string — they are what triggers the chart/table renderer.
 
-For charts, use a clawchart block with inline data:
+Example "newText" for a chart (note the triple backticks ARE part of the string):
+
 \`\`\`clawchart
 type: line
-source: weekly_retention
-x: week
-y: retention_rate
-title: Weekly Retention by Region
+source: daily_active_users
+x: date
+y: dau
+title: Daily Active Users
 data:
-  - { week: "W01", US: 0.46, Canada: 0.41, UK: 0.39, Germany: 0.38 }
-  - { week: "W02", US: 0.455, Canada: 0.405, UK: 0.392, Germany: 0.379 }
+  - { date: "2023-10-01", dau: 150000 }
+  - { date: "2023-10-02", dau: 155000 }
 \`\`\`
 
-For tables, use a clawtable block with inline data:
+Example "newText" for a table:
+
 \`\`\`clawtable
 source: retention_breakdown
 columns: [region, platform, users, retention_rate]
@@ -232,9 +263,11 @@ data:
   - { region: "Canada", platform: "iOS", users: 194000, retention_rate: "36%" }
 \`\`\`
 
-ALWAYS include the "data" field with actual values from your tool results. The chart/table components need this data to render correctly.
+CRITICAL: The triple backticks at the start and end are REQUIRED inside the newText value. Without them the chart will not render. You may combine charts/tables with regular markdown headings and paragraphs in the same newText.
 
-Respond ONLY with valid JSON. No markdown fences.`
+ALWAYS include the "data" field with actual values from your tool results.
+
+Respond ONLY with valid JSON (do NOT wrap your response in markdown code fences). But DO include triple backticks INSIDE the JSON string values for clawchart/clawtable blocks.`
     ),
     new HumanMessage(
       `## Current Document\n\n${state.documentSnapshot}\n\n## Data Gathered\n\n${state.toolResultsSummary}\n\n## User Request\n\n${[...state.messages].reverse().find((m) => m._getType() === "human")?.content ?? ""}`
@@ -246,18 +279,23 @@ Respond ONLY with valid JSON. No markdown fences.`
 
   try {
     const content = typeof resp.content === "string" ? resp.content : JSON.stringify(resp.content);
-    const cleaned = content.replace(/```json\n?/g, "").replace(/```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
-    message = parsed.message ?? "";
-    edits = (parsed.edits ?? []).map((e: Record<string, unknown>) => ({
-      type: e.type ?? "insert",
-      description: e.description ?? "Edit",
-      reason: e.reason ?? "",
-      oldText: e.oldText,
-      newText: e.newText,
-      anchor: e.anchor,
-      startLine: e.startLine,
-      endLine: e.endLine,
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(content.trim());
+    } catch {
+      const stripped = content.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "").trim();
+      parsed = JSON.parse(stripped);
+    }
+    message = (parsed.message as string) ?? "";
+    edits = ((parsed.edits as Record<string, unknown>[]) ?? []).map((e) => ({
+      type: ((e.type as string) ?? "insert") as ProposedEdit["type"],
+      description: (e.description as string) ?? "Edit",
+      reason: (e.reason as string) ?? "",
+      oldText: e.oldText as string | undefined,
+      newText: ensureChartFences(e.newText as string | undefined),
+      anchor: e.anchor as string | undefined,
+      startLine: e.startLine as number | undefined,
+      endLine: e.endLine as number | undefined,
     }));
   } catch {
     message = typeof resp.content === "string" ? resp.content : "I've analyzed the data but had trouble formatting the edits. Please try again.";
@@ -291,6 +329,11 @@ function shouldCallTools(
 function shouldContinueAfterReflection(
   state: AgentState
 ): "tool_caller" | "doc_writer" {
+  const toolCallCount = state.messages.filter((m) => m._getType() === "tool").length;
+  if (toolCallCount >= 6) {
+    return "doc_writer";
+  }
+
   const lastMsg = state.messages[state.messages.length - 1];
   const content = typeof lastMsg.content === "string" ? lastMsg.content : "";
   if (content.includes("NEED_MORE")) {

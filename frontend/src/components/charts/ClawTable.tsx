@@ -17,9 +17,9 @@ const SAMPLE_DATA: Record<string, Record<string, unknown>[]> = {
 
 function TrendBadge({ trend }: { trend: string }) {
   const colors: Record<string, string> = {
-    up: "text-emerald-400 bg-emerald-400/10",
-    down: "text-rose-400 bg-rose-400/10",
-    stable: "text-slate-400 bg-slate-400/10",
+    up: "text-emerald-600 bg-emerald-50",
+    down: "text-rose-600 bg-rose-50",
+    stable: "text-gray-500 bg-gray-100",
   };
   return (
     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${colors[trend] ?? colors.stable}`}>
@@ -34,29 +34,29 @@ export default function ClawTable({ config }: { config: ClawTableBlock }) {
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-24 bg-slate-800/50 rounded-lg border border-slate-700 text-slate-400 text-sm">
+      <div className="flex items-center justify-center h-24 bg-gray-50 rounded-lg border border-gray-200 text-gray-400 text-sm">
         No data for source: {config.source}
       </div>
     );
   }
 
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-slate-700/50">
+    <div className="my-4 overflow-hidden rounded-xl border border-gray-200 shadow-sm">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-slate-800/80">
+          <tr className="bg-gray-50">
             {columns.map((col) => (
-              <th key={col} className="px-4 py-2.5 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <th key={col} className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {col.replace(/_/g, " ")}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-700/50">
+        <tbody className="divide-y divide-gray-100">
           {data.map((row, i) => (
-            <tr key={i} className="bg-slate-800/20 hover:bg-slate-800/40 transition-colors">
+            <tr key={i} className="hover:bg-gray-50 transition-colors">
               {columns.map((col) => (
-                <td key={col} className="px-4 py-2.5 text-slate-300">
+                <td key={col} className="px-4 py-2.5 text-gray-600">
                   {col === "trend" ? (
                     <TrendBadge trend={String(row[col] ?? "")} />
                   ) : (

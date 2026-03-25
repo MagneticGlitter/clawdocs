@@ -29,24 +29,24 @@ function ChatBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
   return (
     <div className={`flex gap-2.5 ${isUser ? "flex-row-reverse" : ""}`}>
-      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${isUser ? "bg-indigo-600" : "bg-slate-700"}`}>
-        {isUser ? <User size={14} className="text-white" /> : <Bot size={14} className="text-indigo-400" />}
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${isUser ? "bg-indigo-600" : "bg-gray-100"}`}>
+        {isUser ? <User size={14} className="text-white" /> : <Bot size={14} className="text-indigo-500" />}
       </div>
       <div className={`flex-1 max-w-[85%] ${isUser ? "flex flex-col items-end" : ""}`}>
         <div className={`rounded-xl px-3.5 py-2.5 text-sm leading-relaxed ${
           isUser
             ? "bg-indigo-600 text-white rounded-tr-sm"
-            : "bg-slate-800/80 text-slate-200 rounded-tl-sm border border-slate-700/50"
+            : "bg-gray-50 text-gray-700 rounded-tl-sm border border-gray-200"
         }`}>
           {message.content}
         </div>
         {message.toolCalls && message.toolCalls.length > 0 && (
           <div className="mt-2 space-y-1">
             {message.toolCalls.map((tc) => (
-              <div key={tc.id} className="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/40 rounded-lg px-2.5 py-1.5 border border-slate-700/30">
-                <Wrench size={11} className="text-indigo-400" />
-                <span className="font-medium text-slate-300">{tc.toolName}</span>
-                <span className={`ml-auto ${tc.status === "completed" ? "text-emerald-400" : tc.status === "failed" ? "text-rose-400" : "text-amber-400"}`}>
+              <div key={tc.id} className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-2.5 py-1.5 border border-gray-200">
+                <Wrench size={11} className="text-indigo-500" />
+                <span className="font-medium text-gray-700">{tc.toolName}</span>
+                <span className={`ml-auto ${tc.status === "completed" ? "text-emerald-600" : tc.status === "failed" ? "text-rose-500" : "text-amber-500"}`}>
                   {tc.status}
                 </span>
               </div>
@@ -56,11 +56,11 @@ function ChatBubble({ message }: { message: ChatMessage }) {
         {message.pendingEdits && message.pendingEdits.length > 0 && (
           <div className="mt-2 space-y-1">
             {message.pendingEdits.map((edit) => (
-              <div key={edit.id} className="flex items-center gap-2 text-xs bg-amber-500/5 border border-amber-500/20 rounded-lg px-2.5 py-1.5">
-                <FileEdit size={11} className="text-amber-400" />
-                <span className="text-amber-200 flex-1">{edit.description}</span>
+              <div key={edit.id} className="flex items-center gap-2 text-xs bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+                <FileEdit size={11} className="text-amber-500" />
+                <span className="text-amber-700 flex-1">{edit.description}</span>
                 <span className={`text-xs font-medium ${
-                  edit.status === "accepted" ? "text-emerald-400" : edit.status === "rejected" ? "text-rose-400" : "text-amber-400"
+                  edit.status === "accepted" ? "text-emerald-600" : edit.status === "rejected" ? "text-rose-500" : "text-amber-500"
                 }`}>
                   {edit.status}
                 </span>
@@ -68,7 +68,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
             ))}
           </div>
         )}
-        <span className="text-[10px] text-slate-500 mt-1 px-1">
+        <span className="text-[10px] text-gray-400 mt-1 px-1">
           {new Date(message.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </span>
       </div>
@@ -81,35 +81,35 @@ function ActivityTab() {
 
   if (activityEvents.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-sm px-6 text-center">
-        <Activity size={24} className="mb-3 text-slate-600" />
+      <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-sm px-6 text-center">
+        <Activity size={24} className="mb-3 text-gray-300" />
         <p>No activity yet</p>
-        <p className="text-xs mt-1 text-slate-600">Agent actions will appear here</p>
+        <p className="text-xs mt-1 text-gray-400">Agent actions will appear here</p>
       </div>
     );
   }
 
   const eventIcon = (type: string) => {
     switch (type) {
-      case "plan": return <ChevronRight size={12} className="text-indigo-400" />;
-      case "tool_call": return <Database size={12} className="text-amber-400" />;
-      case "edit_proposed": return <FileEdit size={12} className="text-blue-400" />;
-      case "edit_accepted": return <CheckCircle2 size={12} className="text-emerald-400" />;
-      case "edit_rejected": return <XCircle size={12} className="text-rose-400" />;
-      case "completed": return <CheckCircle2 size={12} className="text-emerald-400" />;
-      default: return <Activity size={12} className="text-slate-400" />;
+      case "plan": return <ChevronRight size={12} className="text-indigo-500" />;
+      case "tool_call": return <Database size={12} className="text-amber-500" />;
+      case "edit_proposed": return <FileEdit size={12} className="text-blue-500" />;
+      case "edit_accepted": return <CheckCircle2 size={12} className="text-emerald-500" />;
+      case "edit_rejected": return <XCircle size={12} className="text-rose-500" />;
+      case "completed": return <CheckCircle2 size={12} className="text-emerald-500" />;
+      default: return <Activity size={12} className="text-gray-400" />;
     }
   };
 
   return (
     <div className="flex-1 overflow-y-auto p-3 space-y-1">
       {activityEvents.map((evt) => (
-        <div key={evt.id} className="flex items-start gap-2.5 px-2.5 py-2 rounded-lg hover:bg-slate-800/30 transition-colors">
+        <div key={evt.id} className="flex items-start gap-2.5 px-2.5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
           <div className="mt-0.5">{eventIcon(evt.type)}</div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-slate-300">{evt.summary}</p>
-            {evt.detail && <p className="text-[11px] text-slate-500 mt-0.5">{evt.detail}</p>}
-            <span className="text-[10px] text-slate-600">
+            <p className="text-xs text-gray-700">{evt.summary}</p>
+            {evt.detail && <p className="text-[11px] text-gray-400 mt-0.5">{evt.detail}</p>}
+            <span className="text-[10px] text-gray-400">
               {new Date(evt.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </span>
           </div>
@@ -352,9 +352,9 @@ export default function ChatPanel() {
   if (!chatOpen) return null;
 
   return (
-    <div className="w-80 bg-[#0b0f15] border-l border-slate-800 flex flex-col">
+    <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
       {/* Tabs */}
-      <div className="flex border-b border-slate-800">
+      <div className="flex border-b border-gray-200">
         {([
           { id: "chat" as TabId, label: "Chat", icon: <MessageSquare size={13} /> },
           { id: "activity" as TabId, label: "Activity", icon: <Activity size={13} /> },
@@ -364,8 +364,8 @@ export default function ChatPanel() {
             onClick={() => setTab(t.id)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors border-b-2 ${
               tab === t.id
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-slate-500 hover:text-slate-300"
+                ? "border-indigo-500 text-indigo-600"
+                : "border-transparent text-gray-400 hover:text-gray-600"
             }`}
           >
             {t.icon}
@@ -381,10 +381,10 @@ export default function ChatPanel() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-4">
             {chatMessages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full text-slate-500 text-sm px-6 text-center">
-                <Sparkles size={24} className="mb-3 text-indigo-500/50" />
-                <p className="font-medium text-slate-400">ClawDocs AI</p>
-                <p className="text-xs mt-1 text-slate-600">
+              <div className="flex flex-col items-center justify-center h-full text-gray-400 text-sm px-6 text-center">
+                <Sparkles size={24} className="mb-3 text-indigo-400" />
+                <p className="font-medium text-gray-600">ClawDocs AI</p>
+                <p className="text-xs mt-1 text-gray-400">
                   Ask questions, generate reports, or request edits to your document
                 </p>
               </div>
@@ -393,7 +393,7 @@ export default function ChatPanel() {
               <ChatBubble key={msg.id} message={msg} />
             ))}
             {isAgentRunning && (
-              <div className="flex items-center gap-2 text-xs text-indigo-400">
+              <div className="flex items-center gap-2 text-xs text-indigo-500">
                 <Loader2 size={13} className="animate-spin" />
                 Agent is working...
               </div>
@@ -402,8 +402,8 @@ export default function ChatPanel() {
           </div>
 
           {/* Input */}
-          <div className="p-3 border-t border-slate-800">
-            <div className="flex items-end gap-2 bg-slate-800/50 rounded-xl border border-slate-700/50 focus-within:border-indigo-500/30 transition-colors p-1">
+          <div className="p-3 border-t border-gray-200">
+            <div className="flex items-end gap-2 bg-gray-50 rounded-xl border border-gray-200 focus-within:border-indigo-300 transition-colors p-1">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -415,7 +415,7 @@ export default function ChatPanel() {
                 }}
                 placeholder="Ask about your data..."
                 rows={1}
-                className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 outline-none resize-none px-3 py-2 max-h-32"
+                className="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none resize-none px-3 py-2 max-h-32"
               />
               <button
                 onClick={handleSend}

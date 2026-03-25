@@ -24,13 +24,13 @@ export default function PatchOverlay() {
           <div className="flex items-center gap-2 justify-end">
             <button
               onClick={acceptAll}
-              className="px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-medium hover:bg-emerald-100 transition-colors"
             >
               Accept All ({pending.length})
             </button>
             <button
               onClick={clearPendingEdits}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-700 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-500 text-xs font-medium hover:bg-gray-50 transition-colors"
             >
               Dismiss
             </button>

@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
 
         const streamResult = await graph.stream(initialState, {
           streamMode: "updates" as const,
+          recursionLimit: 50,
         });
 
         for await (const chunk of streamResult) {

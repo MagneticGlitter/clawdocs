@@ -34,7 +34,7 @@ app.get("/health", (_req, res) => {
 
 const PORT = parseInt(process.env.PORT || "4000", 10);
 
-app.listen(PORT, () => {
-  console.log(`ClawDocs MCP server listening on http://localhost:${PORT}/mcp`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`ClawDocs MCP server listening on http://0.0.0.0:${PORT}/mcp`);
+  console.log(`Health check: http://0.0.0.0:${PORT}/health`);
 });

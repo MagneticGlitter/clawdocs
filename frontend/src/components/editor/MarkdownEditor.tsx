@@ -7,7 +7,6 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { defaultKeymap, indentWithTab, history, historyKeymap } from "@codemirror/commands";
 import { languages } from "@codemirror/language-data";
 import { syntaxHighlighting, defaultHighlightStyle, bracketMatching, indentOnInput } from "@codemirror/language";
-import { oneDark } from "@codemirror/theme-one-dark";
 
 interface MarkdownEditorProps {
   value: string;
@@ -19,6 +18,7 @@ const editorTheme = EditorView.theme({
   "&": {
     height: "100%",
     fontSize: "14px",
+    backgroundColor: "#ffffff",
   },
   ".cm-scroller": {
     fontFamily: "var(--font-geist-mono), 'Fira Code', 'Cascadia Code', monospace",
@@ -27,26 +27,31 @@ const editorTheme = EditorView.theme({
   },
   ".cm-content": {
     padding: "0 16px",
+    color: "#1f2937",
+    caretColor: "#4f46e5",
   },
   ".cm-gutters": {
-    backgroundColor: "transparent",
-    borderRight: "1px solid #1e293b",
-    color: "#475569",
+    backgroundColor: "#fafafa",
+    borderRight: "1px solid #e5e7eb",
+    color: "#9ca3af",
     minWidth: "48px",
   },
   ".cm-activeLineGutter": {
-    backgroundColor: "transparent",
-    color: "#94a3b8",
+    backgroundColor: "#f3f4f6",
+    color: "#6b7280",
   },
   ".cm-activeLine": {
-    backgroundColor: "rgba(99, 102, 241, 0.06)",
+    backgroundColor: "#f8f9ff",
   },
   ".cm-selectionBackground": {
-    backgroundColor: "rgba(99, 102, 241, 0.2) !important",
+    backgroundColor: "rgba(99, 102, 241, 0.15) !important",
   },
   ".cm-cursor": {
-    borderLeftColor: "#818cf8",
+    borderLeftColor: "#4f46e5",
     borderLeftWidth: "2px",
+  },
+  ".cm-line": {
+    color: "#1f2937",
   },
 });
 
@@ -74,7 +79,6 @@ export default function MarkdownEditor({ value, onChange, className }: MarkdownE
           keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
           markdown({ base: markdownLanguage, codeLanguages: languages }),
           syntaxHighlighting(defaultHighlightStyle),
-          oneDark,
           editorTheme,
           EditorView.updateListener.of((update) => {
             if (update.docChanged && !isExternalUpdate.current) {
@@ -119,7 +123,7 @@ export default function MarkdownEditor({ value, onChange, className }: MarkdownE
   return (
     <div
       ref={containerRef}
-      className={`h-full overflow-hidden bg-[#0d1117] ${className ?? ""}`}
+      className={`h-full overflow-hidden bg-white ${className ?? ""}`}
     />
   );
 }

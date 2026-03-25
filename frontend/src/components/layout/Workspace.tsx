@@ -16,9 +16,9 @@ export default function Workspace() {
 
   if (!doc) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#0d1117] text-slate-500">
+      <div className="flex-1 flex items-center justify-center bg-gray-50 text-gray-400">
         <div className="text-center">
-          <p className="text-lg font-medium text-slate-400">No document open</p>
+          <p className="text-lg font-medium text-gray-500">No document open</p>
           <p className="text-sm mt-1">Create a new document from the sidebar</p>
         </div>
       </div>
@@ -31,7 +31,7 @@ export default function Workspace() {
   return (
     <div className="flex-1 flex relative overflow-hidden">
       {showEditor && (
-        <div className={`${viewMode === "split" ? "w-[55%]" : "w-full"} relative flex flex-col border-r border-slate-800`}>
+        <div className={`${viewMode === "split" ? "w-[55%]" : "w-full"} relative flex flex-col border-r border-gray-200`}>
           <MarkdownEditor
             value={doc.content}
             onChange={(val) => updateDocumentContent(doc.id, val)}
