@@ -104,3 +104,6 @@ Any MCP-compatible client can connect to this server. The frontend auto-discover
 ## Deployment
 
 The MCP server includes a `Dockerfile` for deploying to GCP Cloud Run or any container platform. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` as environment variables.
+
+Current Cloud Run URL:
+- `https://clawdocs-mcp-server-zi5phqrb6q-uc.a.run.app`
