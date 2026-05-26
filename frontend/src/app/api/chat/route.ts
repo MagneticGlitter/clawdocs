@@ -17,6 +17,32 @@ function encodeSSE(event: StreamEvent): string {
   return `data: ${JSON.stringify(event)}\n\n`;
 }
 
+function classifyError(err: unknown): { code?: string; message: string } {
+  const message = err instanceof Error ? err.message : String(err ?? "Unknown error");
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("supabase_unavailable") ||
+    normalized.includes("project is not active") ||
+    normalized.includes("database is not accepting connections") ||
+    normalized.includes("could not connect to the database") ||
+    normalized.includes("fetch failed") ||
+    normalized.includes("econnreset") ||
+    normalized.includes("etimedout") ||
+    normalized.includes("enotfound") ||
+    normalized.includes("503") ||
+    normalized.includes("service unavailable") ||
+    normalized.includes("temporarily unavailable")
+  ) {
+    return {
+      code: "SUPABASE_UNAVAILABLE",
+      message: "Supabase is down right now. Please contact admin.",
+    };
+  }
+
+  return { message };
+}
+
 async function resolveTools() {
   const mcpUrl = process.env.MCP_SERVER_URL;
   if (mcpUrl) {
@@ -129,20 +155,26 @@ export async function POST(req: NextRequest) {
               for (const msg of msgs) {
                 if (msg._getType() === "tool") {
                   const toolMsg = msg as { name?: string; content: unknown };
+                  const output = typeof toolMsg.content === "string"
+                    ? toolMsg.content.slice(0, 500)
+                    : JSON.stringify(toolMsg.content).slice(0, 500);
+
                   controller.enqueue(
                     encoder.encode(
                       encodeSSE({
                         type: "tool_result",
                         data: {
                           toolName: toolMsg.name ?? "unknown",
-                          output: typeof toolMsg.content === "string"
-                            ? toolMsg.content.slice(0, 500)
-                            : JSON.stringify(toolMsg.content).slice(0, 500),
+                          output,
                           status: "completed",
                         },
                       })
                     )
                   );
+
+                  if (output.includes("SUPABASE_UNAVAILABLE")) {
+                    throw new Error(output);
+                  }
                 }
               }
             }
@@ -187,10 +219,10 @@ export async function POST(req: NextRequest) {
 
         controller.enqueue(encoder.encode(encodeSSE({ type: "done", data: {} })));
       } catch (err) {
-        const errMsg = err instanceof Error ? err.message : "Unknown error";
+        const errorPayload = classifyError(err);
         controller.enqueue(
           encoder.encode(
-            encodeSSE({ type: "error", data: { message: errMsg } })
+            encodeSSE({ type: "error", data: errorPayload })
           )
         );
       } finally {

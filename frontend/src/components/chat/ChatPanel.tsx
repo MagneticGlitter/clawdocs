@@ -25,6 +25,19 @@ interface StreamEvent {
   data: Record<string, unknown>;
 }
 
+interface ChatStreamError {
+  message: string;
+  code?: string;
+}
+
+function formatChatError(error: ChatStreamError): string {
+  if (error.code === "SUPABASE_UNAVAILABLE") {
+    return "Supabase is down right now. Please contact admin.";
+  }
+
+  return error.message.startsWith("Error:") ? error.message : `Error: ${error.message}`;
+}
+
 function ChatBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
   return (
@@ -127,7 +140,7 @@ async function processSSEStream(
     onToolResult: (tr: { toolName: string; output: string; status: string }) => void;
     onMessage: (content: string) => void;
     onEdits: (edits: PatchEdit[]) => void;
-    onError: (message: string) => void;
+    onError: (error: ChatStreamError) => void;
     onDone: () => void;
   }
 ) {
@@ -182,7 +195,10 @@ async function processSSEStream(
             );
             break;
           case "error":
-            callbacks.onError(event.data.message as string);
+            callbacks.onError({
+              message: event.data.message as string,
+              code: event.data.code as string | undefined,
+            });
             break;
           case "done":
             callbacks.onDone();
@@ -315,11 +331,12 @@ export default function ChatPanel() {
           });
         },
 
-        onError(message) {
+        onError(error) {
+          const message = formatChatError(error);
           addChatMessage({
             documentId: "",
             role: "assistant",
-            content: `Error: ${message}`,
+            content: message,
           });
           addActivityEvent({ type: "error", summary: message });
         },

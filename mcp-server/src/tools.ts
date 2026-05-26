@@ -2,6 +2,49 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getSupabase } from "./supabase.js";
 
+const SUPABASE_UNAVAILABLE_PATTERNS = [
+  /fetch failed/i,
+  /ECONNRESET/i,
+  /ETIMEDOUT/i,
+  /ENOTFOUND/i,
+  /503/i,
+  /service unavailable/i,
+  /temporarily unavailable/i,
+  /project is not active/i,
+  /database is not accepting connections/i,
+  /could not connect to the database/i,
+  /connection refused/i,
+];
+
+function extractErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object") {
+    const maybeMessage = (error as { message?: unknown }).message;
+    if (typeof maybeMessage === "string" && maybeMessage.trim()) return maybeMessage;
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+  return String(error ?? "Unknown error");
+}
+
+function isSupabaseUnavailableError(error: unknown): boolean {
+  const message = extractErrorMessage(error);
+  return SUPABASE_UNAVAILABLE_PATTERNS.some((pattern) => pattern.test(message));
+}
+
+function toolErrorText(operation: string, error: unknown): string {
+  const message = extractErrorMessage(error);
+
+  if (isSupabaseUnavailableError(error)) {
+    return `SUPABASE_UNAVAILABLE: Supabase is down right now. Please contact admin. (${operation})`;
+  }
+
+  return `${operation} failed: ${message}`;
+}
+
 export function registerTools(server: McpServer) {
   server.tool(
     "query_data",
@@ -29,7 +72,7 @@ export function registerTools(server: McpServer) {
       if (error) {
         return {
           content: [
-            { type: "text" as const, text: `Query error: ${error.message}` },
+            { type: "text" as const, text: toolErrorText("query_data", error) },
           ],
         };
       }
@@ -56,7 +99,7 @@ export function registerTools(server: McpServer) {
       if (error) {
         return {
           content: [
-            { type: "text" as const, text: `Schema error: ${error.message}` },
+            { type: "text" as const, text: toolErrorText("inspect_schema", error) },
           ],
         };
       }
@@ -88,7 +131,7 @@ export function registerTools(server: McpServer) {
       if (error) {
         return {
           content: [
-            { type: "text" as const, text: `Lookup error: ${error.message}` },
+            { type: "text" as const, text: toolErrorText("lookup_metric", error) },
           ],
         };
       }
@@ -130,7 +173,7 @@ export function registerTools(server: McpServer) {
       if (error) {
         return {
           content: [
-            { type: "text" as const, text: `Lookup error: ${error.message}` },
+            { type: "text" as const, text: toolErrorText("lookup_column", error) },
           ],
         };
       }
