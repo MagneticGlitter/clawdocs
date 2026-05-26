@@ -1,4 +1,4 @@
-# ClawDocs
+# ClawDocs (VIDEO DEMO: [youtu.be](https://youtu.be/j_ZctYP8Sho?si=EAFic7wOTn2teFtO))
 
 A markdown-native AI report editor that can query your data, understand your internal definitions, and turn that into editable documents with inline AI patches.
 
